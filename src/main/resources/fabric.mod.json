@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "figua",
+  "version": "${version}",
+
+  "name": "Figua Mod",
+  "description": "figua.",
+  "authors": [
+    "Me!"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/figua/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.fabricmc.example.FiguaMod"
+    ],
+    "preLaunch": [
+      "net.fabricmc.example.FiguaModPreLaunch"
+    ]
+  },
+  "mixins": [
+    "figua.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
