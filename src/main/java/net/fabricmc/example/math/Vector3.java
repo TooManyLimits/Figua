@@ -113,6 +113,9 @@ public record Vector3(double x, double y, double z) implements UniformConvertibl
         });
     }};
 
+    //I don't really get how the reflection stuff works tbh
+    //Got this style of code from Frangura, I'll copy it for other math items
+    //But for APIs I'll just use the lua stack since I get that
     @Override
     public JavaFunction getMetamethod(Metamethod metamethod) {
         return switch (metamethod) {
@@ -165,7 +168,7 @@ public record Vector3(double x, double y, double z) implements UniformConvertibl
             case NEWINDEX -> state -> {
                 throw new LuaRuntimeException("Cannot set values in a vector!");
             };
-            case LEN -> state -> { //Was debating making this the length method, but decided against it
+            case LEN -> state -> { //Was debating making this the .length method, but decided against it
                 state.pushInteger(3);
                 return 1;
             };
