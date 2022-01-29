@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 public class Avatar {
 
-    private UUID uuid;
+    private boolean isReady = false;
 
     //The actual texture for this avatar.
     //TODO: Allow multiple textures, such as emissive
@@ -30,17 +30,23 @@ public class Avatar {
     private NbtCompound modelNbt;
     private String luaSource;
 
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public void complete() {
+        isReady = true;
+    }
+
     /**
-     * Simple constructor, just assigns the variables as given.
-     * Should not be used in normal circumstances, instead use an
-     * NbtDeserializer<Avatar>.
+     * Fills the avatar with the provided data, and marks it as "ready."
      */
-    public Avatar(UUID uuid, FiguaTexture figuaTexture, VAO vao, NbtCompound modelNbt, String luaSource) {
-        this.uuid = uuid;
+    public void fill(VAO vao, NbtCompound modelNbt, FiguaTexture figuaTexture, String luaSource) {
         this.texture = figuaTexture;
         this.vao = vao;
         this.modelNbt = modelNbt;
         this.luaSource = luaSource;
+        isReady = true;
     }
 
     /**
@@ -49,6 +55,7 @@ public class Avatar {
      * @return The new AvatarState.
      */
     public AvatarState instantiate(Entity owner) {
+        if (!isReady) throw new IllegalStateException("Tried to instantiate avatar which was not yet ready!");
         return new AvatarState(this, modelNbt, luaSource, owner);
     }
 

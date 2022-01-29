@@ -6,8 +6,14 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL32;
+import org.terasology.jnlua.JavaFunction;
+import org.terasology.jnlua.JavaReflector;
+import org.terasology.jnlua.LuaRuntimeException;
+import org.terasology.jnlua.TypedJavaObject;
 
 import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A 4x4 matrix of doubles.
@@ -15,7 +21,7 @@ import java.nio.FloatBuffer;
 public record Matrix4(double a11, double a21, double a31, double a41,
                       double a12, double a22, double a32, double a42,
                       double a13, double a23, double a33, double a43,
-                      double a14, double a24, double a34, double a44) implements UniformConvertible {
+                      double a14, double a24, double a34, double a44) implements UniformConvertible, TypedJavaObject, JavaReflector {
 
     public static final Matrix4 IDENTITY = new Matrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
@@ -83,6 +89,43 @@ public record Matrix4(double a11, double a21, double a31, double a41,
                 .put((float) a12).put((float) a22).put((float) a32).put((float) a42)
                 .put((float) a13).put((float) a23).put((float) a33).put((float) a43)
                 .put((float) a14).put((float) a24).put((float) a34).put((float) a44);
+    }
+
+    public Matrix4 add(Matrix4 other) {
+        return new Matrix4(
+                a11 + other.a11, a21 + other.a21, a31 + other.a31, a41 + other.a41,
+                a12 + other.a12, a22 + other.a22, a32 + other.a32, a42 + other.a42,
+                a13 + other.a13, a23 + other.a23, a33 + other.a33, a43 + other.a43,
+                a14 + other.a14, a24 + other.a24, a34 + other.a34, a44 + other.a44
+        );
+    }
+
+    public Matrix4 subtract(Matrix4 other) {
+        return new Matrix4(
+                a11 - other.a11, a21 - other.a21, a31 - other.a31, a41 - other.a41,
+                a12 - other.a12, a22 - other.a22, a32 - other.a32, a42 - other.a42,
+                a13 - other.a13, a23 - other.a23, a33 - other.a33, a43 - other.a43,
+                a14 - other.a14, a24 - other.a24, a34 - other.a34, a44 - other.a44
+        );
+    }
+
+    public Matrix4 multiply(double n) {
+        return new Matrix4(
+                a11 * n, a21 * n, a31 * n, a41 * n,
+                a12 * n, a22 * n, a32 * n, a42 * n,
+                a13 * n, a23 * n, a33 * n, a43 * n,
+                a14 * n, a24 * n, a34 * n, a44 * n
+        );
+    }
+
+    public Matrix4 pow(int n) {
+        if (n == 0) return IDENTITY;
+        if (n == 1) return this;
+        if (n % 2 == 0) {
+            return (this.multiply(this)).pow(n/2);
+        } else {
+            return this.multiply((this.multiply(this)).pow(n/2));
+        }
     }
 
     /**
@@ -173,6 +216,111 @@ public record Matrix4(double a11, double a21, double a31, double a41,
         Matrix4f result = new Matrix4f();
         result.readColumnMajor(copyingBuffer);
         return result;
+    }
+
+    /**
+     * LUA BELOW
+     */
+
+    private static final Map<String, JavaFunction> luaFunctions = new HashMap<>() {{
+        //TODO: Add an inverse function
+        put("inverse", state -> {
+            state.pushJavaObject(this);
+            return 1;
+        });
+    }};
+
+    @Override
+    public JavaFunction getMetamethod(JavaReflector.Metamethod metamethod) {
+        return switch (metamethod) {
+            case ADD -> state -> {
+                state.pushJavaObject(add(state.checkJavaObject(2, Matrix4.class)));
+                return 1;
+            };
+            case SUB -> state -> {
+                state.pushJavaObject(subtract(state.checkJavaObject(2, Matrix4.class)));
+                return 1;
+            };
+            case MUL -> state -> {
+                if (state.isNumber(1)) {
+                    double val = state.toNumber(1);
+                    state.pushJavaObject(multiply(val));
+                } else if (state.isNumber(2)) {
+                    double val = state.toNumber(2);
+                    state.pushJavaObject(multiply(val));
+                } else {
+                    Matrix4 mat1 = state.checkJavaObject(1, Matrix4.class);
+                    Matrix4 mat2 = state.checkJavaObject(2, Matrix4.class);
+                    state.pushJavaObject(mat2.multiply(mat1));
+                }
+                return 1;
+            };
+            case DIV -> state -> {
+                double val = state.checkNumber(2);
+                state.pushJavaObject(multiply(1 / val));
+                return 1;
+            };
+            case POW -> state -> {
+                int n = (int) state.checkInteger(2);
+                if (n < 0) throw new IllegalArgumentException("Cannot raise a matrix to a negative power");
+                state.pushJavaObject(pow(n));
+                return 1;
+            };
+            case INDEX -> state -> {
+                String index = state.checkString(2);
+                switch (index) {
+                    case "v11", "1" -> state.pushNumber(a11);
+                    case "v12", "5" -> state.pushNumber(a12);
+                    case "v13", "9" -> state.pushNumber(a13);
+                    case "v14", "13" -> state.pushNumber(a14);
+                    case "v21", "2" -> state.pushNumber(a21);
+                    case "v22", "6" -> state.pushNumber(a22);
+                    case "v23", "10" -> state.pushNumber(a23);
+                    case "v24", "14" -> state.pushNumber(a24);
+                    case "v31", "3" -> state.pushNumber(a31);
+                    case "v32", "7" -> state.pushNumber(a32);
+                    case "v33", "11" -> state.pushNumber(a33);
+                    case "v34", "15" -> state.pushNumber(a34);
+                    case "v41", "4" -> state.pushNumber(a41);
+                    case "v42", "8" -> state.pushNumber(a42);
+                    case "v43", "12" -> state.pushNumber(a43);
+                    case "v44", "16" -> state.pushNumber(a44);
+                    default -> {
+                        JavaFunction func = luaFunctions.get(index);
+                        if (func == null) state.pushNil();
+                        else state.pushJavaFunction(func);
+                    }
+                }
+                return 1;
+            };
+            case NEWINDEX -> state -> {
+                throw new LuaRuntimeException("Cannot set values in a matrix!");
+            };
+            case LEN -> state -> { //Was debating making this the length method, but decided against it
+                state.pushInteger(16);
+                return 1;
+            };
+            case TOSTRING -> state -> {
+                state.pushString(toString());
+                return 1;
+            };
+            default -> null;
+        };
+    }
+
+    @Override
+    public Object getObject() {
+        return this;
+    }
+
+    @Override
+    public Class<?> getType() {
+        return getClass();
+    }
+
+    @Override
+    public boolean isStrong() {
+        return true;
     }
 
 }

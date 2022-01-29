@@ -15,11 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class EntityRendererMixin {
     @Inject(at = @At("HEAD"), method = "render")
     private void testDrawing(Entity e, float f, float g, MatrixStack m, VertexConsumerProvider vcp, int l, CallbackInfo ci) {
-        if (FiguaMod.AVATAR_PROVIDER == null) {
-            FiguaMod.avatarTestInit();
-        }
-        AvatarState as = FiguaMod.AVATAR_PROVIDER.getAvatarFor(e);
-        if (as != null)
-            as.render(g);
+        //TODO: move the injection point for calling draw on the avatar to just before the drawElements() call to make it possibly functional with iris potentially maybe perhaps
     }
 }

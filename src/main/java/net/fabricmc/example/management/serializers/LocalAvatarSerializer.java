@@ -9,14 +9,14 @@ import java.nio.file.Path;
  * Accepts a path to a local avatar folder,
  * and returns an NbtCompound containing all info
  * of the avatar.
- * This compound can be passed to an AvatarDeserializer,
- * same as any downloaded from the backend.
+ * This compound can be treated the same as any downloaded
+ * from the backend.
  */
 public class LocalAvatarSerializer implements NbtSerializer<Path> {
 
     private final BBModelSerializer modelSerializer;
     private final PngImageSerializer textureSerializer;
-    private ScriptSerializer scriptSerializer;
+    private final ScriptSerializer scriptSerializer;
 
     public LocalAvatarSerializer() {
         this(new BBModelSerializer(), new PngImageSerializer(), new ScriptSerializer());
@@ -28,6 +28,7 @@ public class LocalAvatarSerializer implements NbtSerializer<Path> {
         this.scriptSerializer = scriptSerializer;
     }
 
+    //TODO: get card metadata, don't hardcode names
     public NbtCompound serialize(Path p) {
         Path modelPath = p.resolve("model.bbmodel");
         Path texturePath = p.resolve("texture.png");

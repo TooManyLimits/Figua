@@ -111,6 +111,12 @@ public record Vector3(double x, double y, double z) implements UniformConvertibl
             state.pushNumber(vec1.dot(vec2));
             return 1;
         });
+        put("cross", state -> {
+            Vector3 vec1 = state.checkJavaObject(1, Vector3.class);
+            Vector3 vec2 = state.checkJavaObject(2, Vector3.class);
+            state.pushJavaObject(vec1.cross(vec2));
+            return 1;
+        });
     }};
 
     @Override
@@ -137,7 +143,12 @@ public record Vector3(double x, double y, double z) implements UniformConvertibl
                 return 1;
             };
             case DIV -> state -> {
-                state.pushJavaObject(divide(state.checkJavaObject(2, Vector3.class)));
+                if (state.isNumber(2)) {
+                    double val = state.toNumber(2);
+                    state.pushJavaObject(scale(1 / val));
+                } else {
+                    state.pushJavaObject(divide(state.checkJavaObject(2, Vector3.class)));
+                }
                 return 1;
             };
             case MOD -> state -> {

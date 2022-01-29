@@ -20,5 +20,4 @@ public class PngImageSerializer implements NbtSerializer<Path> {
         }
         return null;
     }
-
 }

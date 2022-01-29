@@ -23,8 +23,6 @@ public class AvatarState {
         this.user = entity;
         this.avatar = avatar;
         rootModelPart = new ModelPartDeserializer().deserialize(modelNbt);
-        double f = 1.0/16;
-        rootModelPart.setTransform(Matrix4.scale(f, f, f));
         transforms = new TransformTexture(rootModelPart.getLastChildTexIndex() + 1);
 
         if (luaSource != null) {
@@ -61,6 +59,8 @@ public class AvatarState {
         luaState.pop(2);
     }
 
+    private static final Matrix4 SCALE_MATRIX = Matrix4.scale(1.0/16, 1.0/16, 1.0/16);
+
     /**
      * Renders this AvatarState with the given tick delta.
      * @param delta The proportion of a tick that has passed at the time this frame was rendered.
@@ -68,9 +68,7 @@ public class AvatarState {
     public void render(float delta) {
         luaRender(delta);
         //Set up all model parts' transforms prior to rendering
-        //Super cursed workaround for crash when game is paused for some reason
-        //if (!MinecraftClient.getInstance().isPaused())
-            rootModelPart.recursiveSetupPreRender(Matrix4.IDENTITY, false, transforms, null);
+        rootModelPart.recursiveSetupPreRender(SCALE_MATRIX, false, transforms, null);
 
         //Use the shaders
         RenderUtils.defaultFiguaShader().use();

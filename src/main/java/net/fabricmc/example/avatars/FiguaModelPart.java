@@ -18,8 +18,8 @@ import java.util.Map;
 
 public class FiguaModelPart {
 
-    private String name;
-    private int luaIndex;
+    private final String name;
+    private final int luaIndex;
 
     /**
      * This array contains all of the FiguaModelParts in
