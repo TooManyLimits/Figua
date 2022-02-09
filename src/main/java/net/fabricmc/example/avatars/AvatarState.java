@@ -28,12 +28,13 @@ public class AvatarState {
         if (luaSource != null) {
             luaState = LuaManager.createLuaState();
             rootModelPart.createAsGlobal(luaState, "model");
-            LuaManager.setupLog(luaState);
+            LuaManager.setupLog(luaState); //TODO: Only setup log if it's local or have the setting on
             LuaManager.runSource(luaState, luaSource);
         }
     }
 
     public void luaTick() {
+        if (luaState == null) return;
         //Push events
         luaState.getGlobal("events");
         //Push events.tick
@@ -49,6 +50,8 @@ public class AvatarState {
     }
 
     public void luaRender(float delta) {
+        //Largely the same as tick, just also pushes delta
+        if (luaState == null) return;
         //System.out.println(luaState.getTotalMemory() - luaState.getFreeMemory());
         luaState.getGlobal("events");
         luaState.getField(-1, "render");
@@ -59,8 +62,6 @@ public class AvatarState {
         luaState.pop(2);
     }
 
-    private static final Matrix4 SCALE_MATRIX = Matrix4.scale(1.0/16, 1.0/16, 1.0/16);
-
     /**
      * Renders this AvatarState with the given tick delta.
      * @param delta The proportion of a tick that has passed at the time this frame was rendered.
@@ -68,12 +69,13 @@ public class AvatarState {
     public void render(float delta) {
         luaRender(delta);
         //Set up all model parts' transforms prior to rendering
-        rootModelPart.recursiveSetupPreRender(SCALE_MATRIX, false, transforms, null);
+        rootModelPart.recursiveSetupPreRender(Matrix4.IDENTITY, false, transforms, null);
 
         //Use the shaders
         RenderUtils.defaultFiguaShader().use();
+
         //Set up the modelview matrix for the entity
-        Matrix4 modelView = MathUtils.entityToWorldMatrix(user).multiply(MathUtils.worldToViewMatrix());
+        Matrix4 modelView = MathUtils.entityToWorldMatrix(user, delta).multiply(MathUtils.worldToViewMatrix());
         RenderUtils.defaultFiguaShader().setUniform("ModelViewMat", modelView);
 
         //Bind our transform texture to unit 1

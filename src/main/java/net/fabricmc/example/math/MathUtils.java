@@ -16,8 +16,7 @@ public class MathUtils {
      * @param e The entity to get the matrix for.
      * @return A matrix which represents the transformation from entity space to part space.
      */
-    public static Matrix4 entityToWorldMatrix(Entity e) {
-        float delta = MinecraftClient.getInstance().getTickDelta();
+    public static Matrix4 entityToWorldMatrix(Entity e, float delta) {
         double yaw;
         if (e instanceof LivingEntity)
             yaw = MathHelper.lerp(delta, ((LivingEntity) e).prevBodyYaw, ((LivingEntity) e).bodyYaw);

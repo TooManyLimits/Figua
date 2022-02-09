@@ -8,7 +8,7 @@ public class EventsApi implements LuaApi {
         //Push "events" table
         luaState.newTable();
 
-        //Push metatable
+        //Push event metatable
         pushMetatable(luaState);
 
         //Push tick table
@@ -19,7 +19,7 @@ public class EventsApi implements LuaApi {
         //Add table to "events"
         luaState.setField(-3, "tick");
 
-        //Push render table
+        //Push render table, same process as tick
         luaState.newTable();
         luaState.pushValue(-2);
         luaState.setMetatable(-2);

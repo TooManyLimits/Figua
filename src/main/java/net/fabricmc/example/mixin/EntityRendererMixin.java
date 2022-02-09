@@ -11,10 +11,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
+
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin {
     @Inject(at = @At("HEAD"), method = "render")
     private void testDrawing(Entity e, float f, float g, MatrixStack m, VertexConsumerProvider vcp, int l, CallbackInfo ci) {
-        //TODO: move the injection point for calling draw on the avatar to just before the drawElements() call to make it possibly functional with iris potentially maybe perhaps
+        List<AvatarState> states = FiguaMod.AVATAR_STATE_MANAGER.getStatesFor(e);
+        for (AvatarState state : states)
+            state.render(g);
     }
 }

@@ -1,13 +1,16 @@
 package net.fabricmc.example.avatars;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.example.math.Matrix4;
 import net.fabricmc.example.rendering.RenderUtils;
 import net.fabricmc.example.rendering.VAO;
 import net.fabricmc.example.rendering.textures.FiguaTexture;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 
-import java.util.UUID;
+import java.util.*;
 
 /**
  * An avatar does NOT store state! It is a collection of resources which can be
@@ -16,6 +19,11 @@ import java.util.UUID;
  * Also contains some identifying information like a UUID for the avatar.
  */
 public class Avatar {
+
+    /**
+     * A map of the various AvatarStates which have been instantiated from this avatar.
+     */
+    private Map<Entity, AvatarState> states = new HashMap<>();
 
     private boolean isReady = false;
 
@@ -52,17 +60,32 @@ public class Avatar {
     /**
      * Instantiates an AvatarState which uses this avatar.
      * @param owner The entity to which this state will be attached.
-     * @return The new AvatarState.
      */
-    public AvatarState instantiate(Entity owner) {
+    private AvatarState instantiate(Entity owner) {
         if (!isReady) throw new IllegalStateException("Tried to instantiate avatar which was not yet ready!");
-        return new AvatarState(this, modelNbt, luaSource, owner);
+        AvatarState newState = new AvatarState(this, modelNbt, luaSource, owner);
+        states.put(owner, newState);
+        return newState;
+    }
+
+    /**
+     * Gets the AvatarState for this entity, if it exists.
+     * If it doesn't exist, then instantiates one for the entity and returns that.
+     * @param e The entity to get an AvatarState for.
+     * @return The AvatarState.
+     */
+    public AvatarState getStateFor(Entity e) {
+        AvatarState state = states.get(e);
+        if (state == null)
+            state = instantiate(e);
+        return state;
     }
 
     /**
      * The rendering phase controlled by the avatar.
      * Binds the regular Figua Texture, uploads the minecraft projection matrix, and draws the VAO.
      */
+
     public void render() {
         //Enable depth testing
         GlStateManager._enableDepthTest();

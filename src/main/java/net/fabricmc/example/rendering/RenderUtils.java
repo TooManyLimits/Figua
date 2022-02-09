@@ -67,8 +67,16 @@ public class RenderUtils {
 
     /**
      * Gets a minecraft projection matrix with the current fov.
+     * Caches result for future calls. Invalidated if fov changes.
      */
+    private static Matrix4 projMat;
+    private static double lastFov;
+
     public static Matrix4 getMCProjectionMatrix() {
-        return Matrix4.fromMatrix4f(MinecraftClient.getInstance().gameRenderer.getBasicProjectionMatrix(getCurrentFov()));
+        if (getCurrentFov() != lastFov) {
+            lastFov = getCurrentFov();
+            projMat = Matrix4.fromMatrix4f(MinecraftClient.getInstance().gameRenderer.getBasicProjectionMatrix(lastFov));
+        }
+        return projMat;
     }
 }

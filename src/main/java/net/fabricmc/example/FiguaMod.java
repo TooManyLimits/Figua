@@ -2,6 +2,10 @@ package net.fabricmc.example;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.example.lua.LuaManager;
+import net.fabricmc.example.management.AvatarStateManager;
+import net.fabricmc.example.management.cards.AvatarCard;
+import net.fabricmc.example.management.cards.CardDeck;
+import net.fabricmc.example.management.cards.LocalAvatarCard;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -21,7 +25,7 @@ public class FiguaMod implements ClientModInitializer {
 
 	public static final String MODID = "figua";
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
-
+	public static final AvatarStateManager AVATAR_STATE_MANAGER = new AvatarStateManager();
 
 	@Override
 	public void onInitializeClient() {
@@ -33,8 +37,24 @@ public class FiguaMod implements ClientModInitializer {
 	}
 
 	//TODO: make an actual tick function that isn't just for my purposes developing in single player
+	private static boolean initializedPlayerForTest = false;
 	private static void tick(MinecraftClient minecraftClient) {
-
+		/**
+		 * TEST
+		 * TEST
+		 * TEST
+		 */
+		if (!initializedPlayerForTest && MinecraftClient.getInstance().player != null) {
+			AvatarCard card = new LocalAvatarCard(getAssetPath().resolve("avatars/error"));
+			CardDeck deck = new CardDeck(card);
+			AVATAR_STATE_MANAGER.addDeckTo(MinecraftClient.getInstance().player, deck);
+			initializedPlayerForTest = true;
+		}
+		/**
+		 * TEST
+		 * TEST
+		 * TEST
+		 */
 	}
 
 	/**

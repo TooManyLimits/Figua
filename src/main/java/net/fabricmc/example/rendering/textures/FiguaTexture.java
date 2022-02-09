@@ -46,6 +46,7 @@ public class FiguaTexture {
         //Send the data from our ByteBuffer to the newly generated texture
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
         GlStateManager._bindTexture(0);
+        glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
         //Free the memory from making the image
         STBImage.stbi_image_free(imageData);

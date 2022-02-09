@@ -3,6 +3,7 @@ package net.fabricmc.example.rendering.textures;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.example.math.MathUtils;
+import net.minecraft.client.MinecraftClient;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -49,6 +50,7 @@ public class TransformTexture {
         GlStateManager._pixelStore(GL_UNPACK_ALIGNMENT, 4);
 
         GlStateManager._bindTexture(0);
+        glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     }
 
     public void bind(int textureUnit) {
@@ -68,6 +70,9 @@ public class TransformTexture {
      * @param buf The buffer containing the data to be uploaded.
      */
     public void uploadData(int firstIndex, int lastIndex, FloatBuffer buf) {
+        //Just slap this on there. If you allow this to run while the game is paused, it causes major glitches and crashes
+        //the game sometimes. for some reason.
+        if (MinecraftClient.getInstance().isPaused()) return;
         int maxSizeInMatrices = MAX_SIZE / 4; //each matrix is 4 pixels
         bind(1);
         int startCopy = firstIndex;

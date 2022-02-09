@@ -57,7 +57,7 @@ public class LuaManager {
     private static final String LOG_HEADER = "[FIGUA LOG] >>> ";
     public static void setupLog(LuaState luaState) {
         luaState.pushJavaFunction(state -> {
-            String message = "";
+            String message = LOG_HEADER;
             if (state.isString(1))
                 message += state.checkString(1, "nil");
             else
@@ -115,6 +115,7 @@ public class LuaManager {
      * Copies the correct JNLua .dll from the assets to the figua directory.
      * Also sets the value of loadPath in NativeSupport.
      * Most of this code is taken from org.terasology.jnlua.NativeSupport.
+     * and from omo.
      */
     public static void setupLuaNatives() {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");

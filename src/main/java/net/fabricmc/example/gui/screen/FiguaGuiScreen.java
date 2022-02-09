@@ -15,8 +15,6 @@ public class FiguaGuiScreen extends Screen {
     }
 
     public void onClose() {
-        MinecraftClient.getInstance().textRenderer.draw()
-
 
         framebuffer.close();
         super.onClose();
